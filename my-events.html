@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Events - Event Management System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- Header -->
+<header th:replace="fragments/header :: header"></header>
+
+<!-- Page Title -->
+<section th:replace="fragments/header :: page-title('Manage Events')"></section>
+
+<div class="container">
+    <!-- Alerts -->
+    <div th:replace="fragments/header :: alerts"></div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-4" id="myEventsTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming"
+                    type="button" role="tab" aria-controls="upcoming" aria-selected="true">
+                <i class="far fa-calendar-alt me-2"></i>Upcoming Events
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past"
+                    type="button" role="tab" aria-controls="past" aria-selected="false">
+                <i class="fas fa-history me-2"></i>Past Events
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="myEventsTabContent">
+        <!-- Upcoming Events Tab -->
+        <div class="tab-pane fade" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+            <a th:href="@{/events/create}" class="btn btn-primary mb-4">
+                <i class="fas fa-plus-circle me-2"></i>Create New Event
+            </a>
+            <div th:if="${upcomingEvents != null and not #lists.isEmpty(upcomingEvents)}">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date & Time</th>
+                        <th>Venue</th>
+                        <th>Capacity</th>
+                        <th>Ticket Price</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="event : ${upcomingEvents}">
+                        <td th:text="${event.name}"></td>
+                        <td th:text="${event.formattedDateTime}"></td>
+                        <td th:text="${event.venue}"></td>
+                        <td th:text="${event.capacity}"></td>
+                        <td th:text="'$' + ${event.ticketPrice}"></td>
+                        <td>
+                            <a th:href="@{'/events/' + ${event.id}}" class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a th:href="@{'/events/' + ${event.id} + '/edit'}" class="btn btn-sm btn-warning me-2">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" th:attr="data-bs-target='#deleteModal-' + ${event.id}">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Delete Confirmation Modal for Each Event -->
+                <div th:each="event : ${upcomingEvents}">
+                    <div class="modal fade" th:id="'deleteModal-' + ${event.id}" tabindex="-1" th:attr="aria-labelledby='deleteModalLabel-' + ${event.id}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" th:id="'deleteModalLabel-' + ${event.id}">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete the event "<span th:text="${event.name}"></span>"? This action cannot be undone.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form th:action="@{'/events/' + ${event.id} + '/delete'}" method="post">
+                                        <button type="submit" class="btn btn-danger">Delete Event</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${upcomingEvents == null or #lists.isEmpty(upcomingEvents)}" class="alert alert-info">
+                You have no upcoming events.
+                <a th:href="@{/events/create}" class="alert-link">Create one now!</a>
+            </div>
+        </div>
+
+        <!-- Past Events Tab (Show all events for admin) -->
+        <div class="tab-pane fade" id="past" role="tabpanel" aria-labelledby="past-tab">
+            <div th:if="${allEvents != null and not #lists.isEmpty(allEvents)}">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Date & Time</th>
+                        <th>Venue</th>
+                        <th>Capacity</th>
+                        <th>Ticket Price</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="event : ${allEvents}">
+                        <td th:text="${event.name}"></td>
+                        <td th:text="${event.formattedDateTime}"></td>
+                        <td th:text="${event.venue}"></td>
+                        <td th:text="${event.capacity}"></td>
+                        <td th:text="'$' + ${event.ticketPrice}"></td>
+                        <td>
+                            <a th:href="@{'/events/' + ${event.id}}" class="btn btn-sm btn-info me-2">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a th:href="@{'/events/' + ${event.id} + '/edit'}" class="btn btn-sm btn-warning me-2">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" th:attr="data-bs-target='#deleteModal-' + ${event.id}">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Delete Confirmation Modal for Each Event -->
+                <div th:each="event : ${allEvents}">
+                    <div class="modal fade" th:id="'deleteModal-' + ${event.id}" tabindex="-1" th:attr="aria-labelledby='deleteModalLabel-' + ${event.id}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" th:id="'deleteModalLabel-' + ${event.id}">Confirm Deletion</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete the event "<span th:text="${event.name}"></span>"? This action cannot be undone.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form th:action="@{'/events/' + ${event.id} + '/delete'}" method="post">
+                                        <button type="submit" class="btn btn-danger">Delete Event</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${allEvents == null or #lists.isEmpty(allEvents)}" class="alert alert-info">
+                You have no events.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<!-- Scripts -->
+<div th:replace="fragments/footer :: scripts"></div>
+</body>
+</html>

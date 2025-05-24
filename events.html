@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Event Management System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- Header -->
+<header th:replace="fragments/header :: header"></header>
+
+<!-- Page Title -->
+<section th:replace="fragments/header :: page-title(title=${keyword != null ? 'Search Results: ' + keyword : 'All Events'})"></section>
+
+<div class="container">
+    <!-- Alerts -->
+    <div th:replace="fragments/header :: alerts"></div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <form th:action="@{/events/search}" method="get" class="d-flex">
+                <input type="text" name="keyword" class="form-control me-2" placeholder="Search events..."
+                       th:value="${keyword != null ? keyword : ''}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="dropdown me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-sort me-1"></i> Sort
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" href="#" onclick="sortByDate()">Date (Soonest)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="sortByPrice('asc')">Price (Low to High)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="sortByPrice('desc')">Price (High to Low)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="sortByPopularity()">Popularity</a></li>
+                </ul>
+            </div>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
+                <i class="fas fa-filter me-1"></i> Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Collapse -->
+    <div class="collapse mb-4" id="filtersCollapse">
+        <div class="card card-body">
+            <form id="filterForm" action="#" class="row g-3">
+                <div class="col-md-6">
+                    <label for="dateRangeStart" class="form-label">Date Range</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control" id="dateRangeStart" name="dateRangeStart">
+                        <span class="input-group-text">to</span>
+                        <input type="date" class="form-control" id="dateRangeEnd" name="dateRangeEnd">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="priceRange" class="form-label">Price Range</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="minPrice" name="minPrice" placeholder="Min" min="0">
+                        <span class="input-group-text">to</span>
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="maxPrice" name="maxPrice" placeholder="Max" min="0">
+                    </div>
+                </div>
+                <div class="col-12 mt-3">
+                    <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" onclick="resetFilters()">Reset Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        <!-- Loop through events -->
+        <div class="col" th:each="event : ${events}" th:if="${events != null and not #lists.isEmpty(events)}">
+            <div class="card h-100 event-card">
+                <img th:src="${event.imageUrl != null and not #strings.isEmpty(event.imageUrl) ? event.imageUrl : 'https://placehold.co/600x400?text=Event+Image'}"
+                     class="card-img-top" alt="Event Image">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${event.name}">Event Name</h5>
+                    <p class="card-text" th:text="${#strings.abbreviate(event.description, 100)}">Description</p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">
+                            <i class="far fa-calendar-alt me-1"></i>
+                            <span th:text="${event.formattedDateTime}">Date</span>
+                        </span>
+                        <span class="badge bg-primary rounded-pill" th:text="${'$' + event.ticketPrice}">$0.00</span>
+                    </div>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span th:text="${event.venue}">Venue</span>
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a th:href="@{'/events/' + ${event.id}}" class="btn btn-outline-primary w-100">View Details</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- No events found -->
+        <div class="col-12 text-center" th:if="${events == null or #lists.isEmpty(events)}">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <span th:if="${keyword != null}">No events found matching your search criteria.</span>
+                <span th:unless="${keyword != null}">No events available at the moment.</span>
+            </div>
+            <a th:href="@{/events}" class="btn btn-outline-primary mt-3" th:if="${keyword != null}">View All Events</a>
+        </div>
+    </div>
+
+    <!-- Pagination (if needed) -->
+    <nav aria-label="Events pagination" th:if="${events != null and not #lists.isEmpty(events) and events.size() > 12}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            <li class="page-item active" aria-current="page">
+                <a class="page-link" href="#">1</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">2</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">3</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Footer -->
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<!-- Scripts -->
+<div th:replace="fragments/footer :: scripts"></div>
+
+<!-- Event-specific JS -->
+<script th:src="@{/js/events.js}"></script>
+</body>
+</html>

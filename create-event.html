@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event - Event Management System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<!-- Header -->
+<header th:replace="fragments/header :: header"></header>
+
+<!-- Page Title -->
+<section th:replace="fragments/header :: page-title('Create New Event')"></section>
+
+<div class="container">
+    <!-- Alerts -->
+    <div th:replace="fragments/header :: alerts"></div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm mb-5">
+                <div class="card-body p-4">
+                    <form th:action="@{/events/create}" method="post" class="needs-validation" novalidate>
+                        <!-- Basic Information -->
+                        <h5 class="mb-4">Basic Information</h5>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="invalid-feedback">
+                                Please enter an event name.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+                            <div class="invalid-feedback">
+                                Please provide a description for the event.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="venue" class="form-label">Venue</label>
+                            <input type="text" class="form-control" id="venue" name="venue" required>
+                            <div class="invalid-feedback">
+                                Please enter the venue location.
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="eventDate" class="form-label">Event Date</label>
+                                <input type="date" class="form-control" id="eventDate" name="date" required>
+                                <div class="invalid-feedback">
+                                    Please select a date.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="eventTime" class="form-label">Event Time</label>
+                                <input type="time" class="form-control" id="eventTime" name="time" required>
+                                <div class="invalid-feedback">
+                                    Please select a time.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Capacity and Pricing -->
+                        <h5 class="mt-5 mb-4">Capacity and Pricing</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="capacity" class="form-label">Capacity</label>
+                                <input type="number" class="form-control" id="capacity" name="capacity" min="1" required>
+                                <div class="invalid-feedback">
+                                    Please enter a valid capacity (minimum 1).
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ticketPrice" class="form-label">Ticket Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="ticketPrice" name="ticketPrice" min="0" step="0.01" required>
+                                    <div class="invalid-feedback">
+                                        Please enter a valid ticket price (0 or greater).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Image and Media -->
+                        <h5 class="mt-5 mb-4">Image and Media</h5>
+                        <div class="mb-4">
+                            <label for="imageUrl" class="form-label">Event Image URL</label>
+                            <input type="url" class="form-control" id="imageUrl" name="imageUrl" placeholder="https://example.com/image.jpg">
+                            <div class="form-text">
+                                Enter a URL for the event's featured image. Leave blank to use a default image.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-5">
+                            <a th:href="@{/events/my-events}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times-circle me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Create Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<!-- Scripts -->
+<div th:replace="fragments/footer :: scripts"></div>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+
+        // Fetch all forms we want to apply validation to
+        const forms = document.querySelectorAll('.needs-validation');
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    // Set minimum date to today
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const formattedDate = yyyy + '-' + mm + '-' + dd;
+        document.getElementById('eventDate').min = formattedDate;
+    });
+</script>
+</body>
+</html>

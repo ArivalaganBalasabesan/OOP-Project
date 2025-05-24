@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Tickets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+<!-- Navigation Bar -->
+<nav class="bg-blue-600 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold">Admin Panel</h1>
+        <div class="space-x-4">
+            <a href="/admin/dashboard" class="hover:underline">Dashboard</a>
+            <a href="/admin/tickets" class="underline">Tickets</a>
+            <a href="/admin/users" class="hover:underline">Users</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mx-auto mt-6 flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white p-4 shadow-md hidden md:block">
+        <h2 class="text-lg font-semibold mb-4">Admin Menu</h2>
+        <ul class="space-y-2">
+            <li><a href="/admin/dashboard" class="text-blue-600 hover:underline">Dashboard</a></li>
+            <li><a href="/admin/tickets" class="text-blue-600 font-bold underline">Tickets</a></li>
+            <li><a href="/admin/users" class="text-blue-600 hover:underline">Manage Users</a></li>
+        </ul>
+    </aside>
+
+    <!-- Tickets Section -->
+    <main class="flex-1 p-6 bg-white shadow-md ml-0 md:ml-4">
+        <h2 class="text-2xl font-bold mb-4">Manage Tickets</h2>
+        <div class="mb-4">
+            <input type="text" id="search" placeholder="Search tickets..." class="w-full p-2 border rounded">
+        </div>
+        <table class="w-full border-collapse">
+            <thead>
+            <tr class="bg-gray-200">
+                <th class="p-2 text-left">Ticket ID</th>
+                <th class="p-2 text-left">User</th>
+                <th class="p-2 text-left">Event</th>
+                <th class="p-2 text-left">Status</th>
+            </tr>
+            </thead>
+            <tbody id="ticketTable">
+            <tr th:each="ticket : ${tickets}">
+                <td class="p-2 border" th:text="${ticket.id}">TCK001</td>
+                <td class="p-2 border" th:text="${ticket.userId}">John Doe</td>
+                <td class="p-2 border" th:text="${ticketEventMap[ticket.eventId] ?: ticket.eventId}">event001</td>
+                <td class="p-2 border">
+                    <span class="px-2 py-1 rounded" th:class="'bg-' + (ticket.status == 'PENDING' ? 'yellow-100 text-yellow-800' : (ticket.status == 'CONFIRMED' ? 'green-100 text-green-800' : 'red-100 text-red-800'))" th:text="${ticket.status}">Pending</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${error}" class="mt-4 text-red-600" th:text="${error}"></div>
+    </main>
+</div>
+
+<script>
+    // Basic search functionality
+    document.getElementById('search').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#ticketTable tr');
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+</script>
+</body>
+</html>
