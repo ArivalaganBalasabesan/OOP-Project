@@ -1,0 +1,5 @@
+a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6|admin|admin123|admin@eventmanagement.com|Admin User|true
+c3d4e5f6-g7h8-9i0j-1k2l-m3n4o5p6q7r8|janedoe|pass456|jane.doe@example.com|Jane Doe|false
+e5f6g7h8-i9j0-1k2l-3m4n-o5p6q7r8s9t0|alicejones|passabc|alice.jones@example.com|Alice Jones|false
+7ed8c6d5-fc06-4a5b-82f4-30617bed1832|ayushsarma78|12345678|sarmayush47@gmail.com|ayush|false
+79067107-1dfe-49da-a44e-319f8992e7e0|shalu|kavishaliniB|kavishaliniB@gmail.com|kavishalini|false
